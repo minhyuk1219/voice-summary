@@ -6,7 +6,7 @@ import { Store } from "@/lib/store";
 import { summarizeText } from "@/lib/summarizer";
 
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: { jobId: string } }
 ) {
   const { jobId } = params;
@@ -17,9 +17,11 @@ export async function POST(
   }
 
   const summary = await summarizeText(job.text);
+
   Store.updateJob(jobId, {
     summary,
+    regeneratedAt: new Date().toISOString(),
   });
 
-  return NextResponse.json({ summary });
+  return NextResponse.json({ ok: true, summary });
 }
