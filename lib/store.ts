@@ -1,4 +1,3 @@
-// lib/store.ts
 type Job = {
   id: string;
   text: string;
