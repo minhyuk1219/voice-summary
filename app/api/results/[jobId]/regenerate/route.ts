@@ -6,7 +6,7 @@ export async function POST(
   request: Request,
   context: { params: { jobId: string } }
 ) {
-  const jobId = context.params.jobId;
+  const { jobId } = context.params;
 
   if (!jobId) {
     return NextResponse.json(
@@ -15,7 +15,7 @@ export async function POST(
     );
   }
 
-  const job = db.jobs.get(jobId);
+  const job = await db.jobs.get(jobId);
 
   if (!job || !job.text) {
     return NextResponse.json(
@@ -26,13 +26,10 @@ export async function POST(
 
   const summary = await summarizeText(job.text);
 
-  db.jobs.update(jobId, {
+  await db.jobs.update(jobId, {
     summary,
     regeneratedAt: new Date().toISOString(),
   });
 
-  return NextResponse.json({
-    ok: true,
-    summary,
-  });
+  return NextResponse.json({ summary });
 }

@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import fs from "fs";
 import path from "path";
-import { Store } from "@/lib/store";
+import { db } from "@/lib/store";
 import { fakeSummarize, fakeTranscribe } from "@/lib/summarizer";
 
 export async function POST(req: Request) {
