@@ -1,29 +1,31 @@
-type Job = {
+// lib/store.ts
+export type Job = {
   id: string;
-  text?: string;
+  text: string;
   summary?: string;
-  createdAt: string;
-  regeneratedAt?: string;
+  isPaid?: boolean;
 };
 
-class JobStore {
+class StoreImpl {
   private jobs = new Map<string, Job>();
 
-  get(id: string) {
+  getJob(id: string) {
     return this.jobs.get(id);
   }
 
-  set(job: Job) {
+  listJobs() {
+    return Array.from(this.jobs.values());
+  }
+
+  createJob(job: Job) {
     this.jobs.set(job.id, job);
   }
 
-  update(id: string, data: Partial<Job>) {
+  updateJob(id: string, data: Partial<Job>) {
     const job = this.jobs.get(id);
     if (!job) return;
     this.jobs.set(id, { ...job, ...data });
   }
 }
 
-export const db = {
-  jobs: new JobStore(),
-};
+export const Store = new StoreImpl();
