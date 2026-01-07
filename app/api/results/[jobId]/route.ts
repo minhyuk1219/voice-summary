@@ -1,22 +1,44 @@
-export const runtime = "nodejs";
-
 import { NextResponse } from "next/server";
-import { Store } from "@/lib/store";
-import { partialText } from "@/lib/summarizer";
+import { summarizeText } from "@/lib/summarizer";
+import { db } from "@/lib/store";
 
-export async function GET(_: Request, { params }: { params: { jobId: string } }) {
-  const job = Store.getJob(params.jobId);
-  if (!job) return NextResponse.json({ error: "결과를 찾을 수 없습니다." }, { status: 404 });
+type Context = {
+  params: {
+    jobId: string;
+  };
+};
 
-  const full = job.summary ?? "(요약 없음)";
-  const partial = partialText(full);
+export async function POST(
+  request: Request,
+  { params }: Context
+) {
+  const { jobId } = params;
+
+  if (!jobId) {
+    return NextResponse.json(
+      { error: "jobId missing" },
+      { status: 400 }
+    );
+  }
+
+  const job = await db.jobs.get(jobId);
+
+  if (!job || !job.text) {
+    return NextResponse.json(
+      { error: "job not found" },
+      { status: 404 }
+    );
+  }
+
+  const summary = await summarizeText(job.text);
+
+  await db.jobs.update(jobId, {
+    summary,
+    regeneratedAt: new Date().toISOString(),
+  });
 
   return NextResponse.json({
-    jobId: job.id,
-    filename: job.filename,
-    status: job.status,
-    isPaid: job.isPaid,
-    partial,
-    full,
+    ok: true,
+    summary,
   });
 }

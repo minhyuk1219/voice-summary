@@ -1,16 +1,44 @@
-export const runtime = "nodejs";
-
 import { NextResponse } from "next/server";
-import { Store } from "@/lib/store";
-import { fakeSummarize, fakeTranscribe } from "@/lib/summarizer";
+import { summarizeText } from "@/lib/summarizer";
+import { db } from "@/lib/store";
 
-export async function POST(_: Request, { params }: { params: { jobId: string } }) {
-  const job = Store.getJob(params.jobId);
-  if (!job) return NextResponse.redirect(new URL(`/r/${params.jobId}`, process.env.APP_URL ?? "http://localhost:3000"));
+type Context = {
+  params: {
+    jobId: string;
+  };
+};
 
-  const transcript = fakeTranscribe(job.filename);
-  const summary = fakeSummarize(transcript);
-  Store.updateJob(job.id, { transcript, summary, status: "done" });
+export async function POST(
+  request: Request,
+  { params }: Context
+) {
+  const { jobId } = params;
 
-  return NextResponse.redirect(new URL(`/r/${params.jobId}`, process.env.APP_URL ?? "http://localhost:3000"));
+  if (!jobId) {
+    return NextResponse.json(
+      { error: "jobId missing" },
+      { status: 400 }
+    );
+  }
+
+  const job = await db.jobs.get(jobId);
+
+  if (!job || !job.text) {
+    return NextResponse.json(
+      { error: "job not found" },
+      { status: 404 }
+    );
+  }
+
+  const summary = await summarizeText(job.text);
+
+  await db.jobs.update(jobId, {
+    summary,
+    regeneratedAt: new Date().toISOString(),
+  });
+
+  return NextResponse.json({
+    ok: true,
+    summary,
+  });
 }
