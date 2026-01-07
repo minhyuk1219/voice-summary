@@ -1,0 +1,30 @@
+{
+  "name": "voice-summary-saas",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "15.5.9",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "clsx": "2.1.1",
+    "tailwindcss": "3.4.10",
+    "postcss": "8.4.47",
+    "autoprefixer": "10.4.20",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.7",
+    "@types/react": "19.0.7",
+    "@types/react-dom": "19.0.3",
+    "typescript": "5.7.3",
+    "eslint": "9.18.0",
+    "eslint-config-next": "15.5.9"
+  }
+}
