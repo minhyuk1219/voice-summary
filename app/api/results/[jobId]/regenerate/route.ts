@@ -2,17 +2,11 @@ import { NextResponse } from "next/server";
 import { summarizeText } from "@/lib/summarizer";
 import { db } from "@/lib/store";
 
-type Context = {
-  params: {
-    jobId: string;
-  };
-};
-
 export async function POST(
   request: Request,
-  { params }: Context
+  context: { params: { jobId: string } }
 ) {
-  const { jobId } = params;
+  const jobId = context.params.jobId;
 
   if (!jobId) {
     return NextResponse.json(
@@ -21,7 +15,7 @@ export async function POST(
     );
   }
 
-  const job = await db.jobs.get(jobId);
+  const job = db.jobs.get(jobId);
 
   if (!job || !job.text) {
     return NextResponse.json(
@@ -32,7 +26,7 @@ export async function POST(
 
   const summary = await summarizeText(job.text);
 
-  await db.jobs.update(jobId, {
+  db.jobs.update(jobId, {
     summary,
     regeneratedAt: new Date().toISOString(),
   });
